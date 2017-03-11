@@ -3,9 +3,17 @@
 @{
     ViewBag.Title = "Index";
 }
-
+@{ 
+    HtmlString a = Html.ActionLink("▲", "Index", "Products",new {sort="+",searchText=ViewBag.searchKey },new { });
+    HtmlString b = Html.ActionLink("▼","Index", "Products", new { sort = "-", searchText = ViewBag.searchKey }, new { });
+}
 <h2>Index</h2>
-
+<div>
+    <form>
+        @Html.TextBox("searchText")
+        <input type="submit" value="search" />
+    </form>
+</div>
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
@@ -15,7 +23,9 @@
             @Html.DisplayNameFor(model => model.ProductName)
         </th>
         <th>
+            @a
             @Html.DisplayNameFor(model => model.Price)
+            @b
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Active)
@@ -49,3 +59,4 @@
 }
 
 </table>
+

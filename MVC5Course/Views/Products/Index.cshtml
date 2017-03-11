@@ -17,6 +17,13 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
+
+@using PagedList
+@using PagedList.Mvc
+@Html.PagedListPager(Model as IPagedList,
+(p) => Url.Action("Index", new { pageNo = p, searchText = ViewBag.searchKey, sort = ViewBag.sort })
+)
+
 <table class="table">
     <tr>
         <th>

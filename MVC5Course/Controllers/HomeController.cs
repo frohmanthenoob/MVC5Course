@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MVC5Course.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -29,6 +30,19 @@ namespace MVC5Course.Controllers
         public ActionResult Test()
         {
             return View();
+        }
+        public ActionResult Login()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult Login(LoginVM form)
+        {
+            if (ModelState.IsValid)
+            {
+                return Content(form.userName + " : " + form.userPassword);
+            }
+            return Content("Login failed.");
         }
     }
 }

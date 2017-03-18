@@ -11,28 +11,48 @@ using PagedList;
 
 namespace MVC5Course.Controllers
 {
-    public class ProductsController : Controller
+    [Authorize]
+    public class ProductsController : BaseController
     {
-        //private FabricsEntities db = new FabricsEntities();
 
-        ProductRepository repo = RepositoryHelper.GetProductRepository();
-
-        // GET: Products
         public ActionResult Index(string sort,string searchText, int pageNo = 1)
         {
-            var data = repo.All().AsQueryable();
+            IQueryable<Product> all = NewMethod(sort, searchText);
+            return View(all.ToPagedList(pageNo, 75));
+        }
+        [HttpPost]
+        public ActionResult Index(Product[] data, string sort, string searchText, int pageNo = 1)
+        {
+            if (ModelState.IsValid)
+            {
+                foreach (var item in data)
+                {
+                    var prod = repo.Find(item.ProductId);
+                    prod.ProductName = item.ProductName;
+                    prod.Price = item.Price;
+                    prod.Stock = item.Stock;
+                    prod.Active = item.Active;
+                    repo.UnitOfWork.Commit();
+                }
+                return RedirectToAction("Index");
+            }
+            IQueryable<Product> all = NewMethod(sort, searchText);
+            return View(all.ToPagedList(pageNo, 75));
+        }
+        private IQueryable<Product> NewMethod(string sort, string searchText)
+        {
+            var all = repo.All().AsQueryable();
             if (!String.IsNullOrEmpty(searchText))
             {
-                data = data.Where(x => x.ProductName.Contains(searchText));
+                all = all.Where(x => x.ProductName.Contains(searchText));
             }
-            data = sort == "+" ?
-            data.OrderBy(x => x.Price):
-            data.OrderByDescending(x => x.Price);
+            all = sort == "+" ?
+            all.OrderBy(x => x.Price) :
+            all.OrderByDescending(x => x.Price);
             ViewBag.searchKey = searchText;
 
             ViewBag.sort = sort;
-
-            return View(data.ToPagedList(pageNo,75));
+            return all;
         }
 
         // GET: Products/Details/5
@@ -93,14 +113,12 @@ namespace MVC5Course.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ProductId,ProductName,Price,Active,Stock")] Product product)
+        public ActionResult Edit(int id,FormCollection form)
         {
-            if (ModelState.IsValid)
+            var product = repo.Find(id);
+            if (TryUpdateModel(product,new string[]{ "ProductName", "Price" }))
             {
-                var db = repo.UnitOfWork.Context;
-                db.Entry(product).State = EntityState.Modified;
                 repo.UnitOfWork.Commit();
-                
                 return RedirectToAction("Index");
             }
             return View(product);

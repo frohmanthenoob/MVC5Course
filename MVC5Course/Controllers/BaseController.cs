@@ -5,7 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace MVC5Course.Controllers
+namespace MVC5Course.ActionFilter
 { 
     public abstract class BaseController : Controller
     {

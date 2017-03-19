@@ -20,6 +20,7 @@ namespace MVC5Course.Models
         [DisplayFormat(DataFormatString = "NT$ {0:N0}")]
         public Nullable<decimal> Price { get; set; }
         public Nullable<bool> Active { get; set; }
+        [Range(0,99999)]
         public Nullable<decimal> Stock { get; set; }
         public bool isDeleted { get; set; }
 

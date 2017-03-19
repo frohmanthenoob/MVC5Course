@@ -6,8 +6,18 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 
-namespace MVC5Course.Controllers
+namespace MVC5Course.ActionFilter
 {
+    [HandleError(View = "Error_ArgumentException",ExceptionType = typeof(ArgumentException))]
+    public class MyException : Exception
+    {
+        public MyException() { }
+        public MyException(string message) : base(message) { }
+        public MyException(string message, Exception inner) : base(message, inner) { }
+        protected MyException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
     public class HomeController : Controller
     {
         public ActionResult Index()
@@ -15,13 +25,16 @@ namespace MVC5Course.Controllers
             return View();
         }
 
-        public ActionResult About()
+        public ActionResult About(string ex="")
         {
             ViewBag.Message = "Your application description page. Test000123.";
-
+            if (ex=="err")
+            {
+                throw new ArgumentException("ex");
+            }
             return View();
         }
-
+        [本機重新導向首頁]
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";

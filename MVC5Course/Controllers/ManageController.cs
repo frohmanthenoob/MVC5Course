@@ -8,7 +8,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using MVC5Course.Models;
 
-namespace MVC5Course.Controllers
+namespace MVC5Course.ActionFilter
 {
     [Authorize]
     public class ManageController : Controller

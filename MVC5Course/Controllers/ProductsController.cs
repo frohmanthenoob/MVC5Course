@@ -8,19 +8,23 @@ using System.Web;
 using System.Web.Mvc;
 using MVC5Course.Models;
 using PagedList;
+using System.Web.UI;
 
-namespace MVC5Course.Controllers
+namespace MVC5Course.ActionFilter
 {
     [Authorize]
+    [OutputCache(Duration =60,Location = OutputCacheLocation.ServerAndClient)]
+    
     public class ProductsController : BaseController
     {
-
+        [紀錄Action執行時間]
         public ActionResult Index(string sort,string searchText, int pageNo = 1)
         {
             IQueryable<Product> all = NewMethod(sort, searchText);
             return View(all.ToPagedList(pageNo, 75));
         }
         [HttpPost]
+        [紀錄Action執行時間]
         public ActionResult Index(Product[] data, string sort, string searchText, int pageNo = 1)
         {
             if (ModelState.IsValid)
@@ -94,6 +98,7 @@ namespace MVC5Course.Controllers
         }
 
         // GET: Products/Edit/5
+        [紀錄Action執行時間]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -116,7 +121,7 @@ namespace MVC5Course.Controllers
         public ActionResult Edit(int id,FormCollection form)
         {
             var product = repo.Find(id);
-            if (TryUpdateModel(product,new string[]{ "ProductName", "Price" }))
+            if (TryUpdateModel(product,includeProperties: new[] { "ProductName", "Price" }))
             {
                 repo.UnitOfWork.Commit();
                 return RedirectToAction("Index");

@@ -177,6 +177,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionFilter\本機重新導向首頁.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\IdentityConfig.cs" />
@@ -188,7 +189,9 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
+    <Compile Include="Controllers\RazorTestController.cs" />
     <Compile Include="Controllers\TestController.cs" />
+    <Compile Include="ActionFilter\紀錄Action執行時間.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -404,6 +407,9 @@
     <Content Include="Views\Shared\_page.cshtml" />
     <Content Include="Views\Empty\View1.cshtml" />
     <Content Include="Views\Empty\View2.cshtml" />
+    <Content Include="Views\Shared\Error_DbEntityValidationException.cshtml" />
+    <Content Include="Views\Shared\Error_ArgumentException - 複製.cshtml" />
+    <Content Include="Views\RazorTest\test1.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

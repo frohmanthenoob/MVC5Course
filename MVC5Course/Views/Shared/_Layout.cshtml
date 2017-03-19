@@ -38,6 +38,14 @@
         <hr />
         <footer>
             <p>&copy; @DateTime.Now.Year - 我的 ASP.NET 應用程式</p>
+            @if (ViewBag.ActionDuration != null)
+            {
+                <pre>
+                    Action起始時間: @ViewBag.StartTime
+                    Action結束時間: @ViewBag.EndTime
+                    Action花費時間: @ViewBag.ActionDuration
+                </pre>
+            }
         </footer>
     </div>
 

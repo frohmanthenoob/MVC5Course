@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MVC5Course.Models.Validations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -9,25 +10,26 @@ namespace MVC5Course.Models
     public class LoginVM : IValidatableObject
     {
         [Required]
-        public string userName { get; set; }
-
+        [MinLength(3)]
+        //[商品名稱不能有Will字串]
+        public string Username { get; set; }
         [Required]
-        public string userPassword { get; set; }
+        [MinLength(6)]
+        public string Password { get; set; }
 
-        public bool loginCheck()
+        public bool LoginCheck()
         {
-            return this.userName == "will";
+            return (this.Username == "will" && this.Password == "123456");
         }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            //throw new NotImplementedException();
-
-            if (!this.loginCheck())
+            if (!this.LoginCheck())
             {
-                yield return new ValidationResult("登入資料錯誤", new string[] { "userName" });
+                yield return new ValidationResult("登入失敗", new string[] { "Username" });
                 yield break;
             }
+
             yield return ValidationResult.Success;
         }
     }

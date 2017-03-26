@@ -3,33 +3,33 @@
 @{
     ViewBag.Title = "Index";
 }
-@{ 
-    HtmlString a = Html.ActionLink("▲", "Index", "Products",new {sort="+",searchText=ViewBag.searchKey },new { });
-    HtmlString b = Html.ActionLink("▼","Index", "Products", new { sort = "-", searchText = ViewBag.searchKey }, new { });
-}
+
 <h2>Index</h2>
-<div>
-    <form>
-        @Html.TextBox("searchText")
-        <input type="submit" value="search" />
-    </form>
-</div>
+
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
+<p>
+    <form>
+        @Html.TextBox("keyword")
+        <input type="submit" value="搜尋" />
+    </form>
+</p>
 
-@Html.Partial("_page", Model)
+@Html.Partial("_Pager", Model)
+
 @using (Html.BeginForm())
 {
+
     <table class="table">
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.ProductName)
             </th>
             <th>
-                @a
+                <a href="@Url.Action("Index", "Products", new { sortBy = "+Price", keyword = ViewBag.keyword })">↑</a>
                 @Html.DisplayNameFor(model => model.Price)
-                @b
+                <a href="@Url.Action("Index", "Products", new { sortBy = "-Price", keyword = ViewBag.keyword })">↓</a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Active)
@@ -39,20 +39,24 @@
             </th>
             <th></th>
         </tr>
+        @*
+            item.ProductName
+            data[0].ProductName
+        *@
         @{
             var data = Model.ToArray();
-
         }
-        @for (int i = 0; i < data.Count(); i++)
+
+        @for(var i=0; i < data.Length; i++)
         {
             @Html.HiddenFor(modelItem => data[i].ProductId)
             <tr>
                 <td>
-                    @Html.EditorFor(modelItem => data[i].ProductName)
+                    @Html.EditorFor(modelItem => data[i].ProductName, null, "data["+i+"].ProductName")
                     @Html.ValidationMessageFor(modelItem => data[i].ProductName)
                 </td>
-                <td>
-                    @Html.EditorFor(modelItem => data[i].Price)
+                <td class="@(data[i].Price > 100 ? "text-danger" : "")">
+                    NT$ @Html.EditorFor(modelItem => data[i].Price)
                     @Html.ValidationMessageFor(modelItem => data[i].Price)
                 </td>
                 <td>
@@ -72,7 +76,7 @@
         }
 
     </table>
-    <input type="submit"  value="送出" />
+
+<input type="submit"
+       value="送出" />
 }
-
-

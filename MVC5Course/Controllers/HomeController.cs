@@ -6,71 +6,74 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 
-namespace MVC5Course.ActionFilter
+namespace MVC5Course.Controllers
 {
-    [HandleError(View = "Error_ArgumentException",ExceptionType = typeof(ArgumentException))]
-    public class MyException : Exception
-    {
-        public MyException() { }
-        public MyException(string message) : base(message) { }
-        public MyException(string message, Exception inner) : base(message, inner) { }
-        protected MyException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
-    }
-    public class HomeController : Controller
+    [HandleError(View = "Error_ArgumentException", ExceptionType = typeof(ArgumentException))]
+    public class HomeController : BaseController
     {
         public ActionResult Index()
         {
             return View();
         }
 
-        public ActionResult About(string ex="")
+        [設定本控制器常用的ViewBag資料]
+        public ActionResult About(int ex)
         {
-            ViewBag.Message = "Your application description page. Test000123.";
-            if (ex=="err")
+            if (ex == 1)
             {
-                throw new ArgumentException("ex");
+                throw new Exception("ex");
             }
+
             return View();
         }
-        [本機重新導向首頁]
+
+        [設定本控制器常用的ViewBag資料]
+        [僅在本機開發測試用]
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
 
             return View();
         }
+
         public ActionResult Test()
         {
             return View();
         }
-        public ActionResult Login(string ReturnUrl="")
+
+        public ActionResult Login(string ReturnUrl)
         {
             return View();
         }
+
         [HttpPost]
-        public ActionResult Login(LoginVM form, string ReturnUrl="")
+        public ActionResult Login(LoginVM login, string ReturnUrl = "")
         {
             if (ModelState.IsValid)
             {
-                FormsAuthentication.RedirectFromLoginPage(form.userName,false);
-                TempData["loginInfo"] = form;
-                //return Content(form.userName + " : " + form.userPassword);
+                FormsAuthentication.RedirectFromLoginPage(login.Username, false);
 
-                return ReturnUrl == null|| ReturnUrl=="" ? Redirect("index") : Redirect(ReturnUrl);
+                TempData["LoginResult"] = login;
+
+                if (ReturnUrl.StartsWith("/"))
+                {
+                    return Redirect(ReturnUrl);
+                }
+                else
+                {
+                    return RedirectToAction("Index");
+                }
             }
-            else
-            {
-                return RedirectToAction("Index");
-            }
-            //return Content("Login failed.");
+
+            return View();
         }
+
         [HttpPost]
         public ActionResult LogOff()
         {
             FormsAuthentication.SignOut();
-            return Redirect("Index");
+
+            return RedirectToAction("Index");
         }
     }
 }

@@ -6,17 +6,17 @@ using System.Web.Mvc;
 
 namespace MVC5Course.Controllers
 {
-    public class RazorTestController : Controller
+    public class MetroController : Controller
     {
-        // GET: RazorTest
+        // GET: Metro
         public ActionResult Index()
         {
             return View();
         }
-        public ActionResult test1()
+
+        public ActionResult Form()
         {
-            int[] data = new int[] { 1,2,3,4,5};
-            return PartialView(data);
+            return View();
         }
     }
 }

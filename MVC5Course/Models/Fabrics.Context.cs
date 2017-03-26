@@ -12,8 +12,6 @@ namespace MVC5Course.Models
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    using System.Data.Entity.Core.Objects;
-    using System.Linq;
     
     public partial class FabricsEntities : DbContext
     {
@@ -32,18 +30,5 @@ namespace MVC5Course.Models
         public virtual DbSet<Order> Order { get; set; }
         public virtual DbSet<OrderLine> OrderLine { get; set; }
         public virtual DbSet<Product> Product { get; set; }
-    
-        public virtual ObjectResult<usp_Fabrics_Result> usp_Fabrics(Nullable<int> createClients, Nullable<int> createOrders)
-        {
-            var createClientsParameter = createClients.HasValue ?
-                new ObjectParameter("CreateClients", createClients) :
-                new ObjectParameter("CreateClients", typeof(int));
-    
-            var createOrdersParameter = createOrders.HasValue ?
-                new ObjectParameter("CreateOrders", createOrders) :
-                new ObjectParameter("CreateOrders", typeof(int));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Fabrics_Result>("usp_Fabrics", createClientsParameter, createOrdersParameter);
-        }
     }
 }

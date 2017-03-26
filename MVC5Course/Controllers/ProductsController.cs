@@ -9,54 +9,42 @@ using System.Web.Mvc;
 using MVC5Course.Models;
 using PagedList;
 using System.Web.UI;
+using System.Data.Entity.Validation;
 
-namespace MVC5Course.ActionFilter
+namespace MVC5Course.Controllers
 {
-    [Authorize]
-    [OutputCache(Duration =60,Location = OutputCacheLocation.ServerAndClient)]
-    
+    //[OutputCache(Duration = 60, Location = OutputCacheLocation.ServerAndClient)]
+    //[Authorize]
     public class ProductsController : BaseController
     {
-        [紀錄Action執行時間]
-        public ActionResult Index(string sort,string searchText, int pageNo = 1)
+        // GET: Products
+        public ActionResult Index(string sortBy, string keyword, int pageNo = 1)
         {
-            IQueryable<Product> all = NewMethod(sort, searchText);
-            return View(all.ToPagedList(pageNo, 75));
+            DoSearchOnIndex(sortBy, keyword, pageNo);
+
+            return View();
         }
+
         [HttpPost]
-        [紀錄Action執行時間]
-        public ActionResult Index(Product[] data, string sort, string searchText, int pageNo = 1)
+        public ActionResult Index(Product[] data,string sortBy, string keyword, int pageNo = 1)
         {
             if (ModelState.IsValid)
             {
                 foreach (var item in data)
                 {
-                    var prod = repo.Find(item.ProductId);
+                    var prod = repoProduct.Find(item.ProductId);
                     prod.ProductName = item.ProductName;
                     prod.Price = item.Price;
                     prod.Stock = item.Stock;
                     prod.Active = item.Active;
-                    repo.UnitOfWork.Commit();
                 }
+                repoProduct.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
-            IQueryable<Product> all = NewMethod(sort, searchText);
-            return View(all.ToPagedList(pageNo, 75));
-        }
-        private IQueryable<Product> NewMethod(string sort, string searchText)
-        {
-            var all = repo.All().AsQueryable();
-            if (!String.IsNullOrEmpty(searchText))
-            {
-                all = all.Where(x => x.ProductName.Contains(searchText));
-            }
-            all = sort == "+" ?
-            all.OrderBy(x => x.Price) :
-            all.OrderByDescending(x => x.Price);
-            ViewBag.searchKey = searchText;
 
-            ViewBag.sort = sort;
-            return all;
+            DoSearchOnIndex(sortBy, keyword, pageNo);
+
+            return View();
         }
 
         // GET: Products/Details/5
@@ -66,12 +54,22 @@ namespace MVC5Course.ActionFilter
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Product product = repo.Find(id.Value);
+            Product product = repoProduct.Find(id.Value);
             if (product == null)
             {
                 return HttpNotFound();
             }
             return View(product);
+        }
+
+        public ActionResult ProductOrderLines(int id)
+        {
+            Product product = repoProduct.Find(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+            return View(product.OrderLine);
         }
 
         // GET: Products/Create
@@ -81,16 +79,16 @@ namespace MVC5Course.ActionFilter
         }
 
         // POST: Products/Create
-        // 若要免於過量張貼攻擊，請啟用想要繫結的特定屬性，如需
-        // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ProductId,ProductName,Price,Active,Stock")] Product product)
         {
             if (ModelState.IsValid)
             {
-                repo.Add(product);
-                repo.UnitOfWork.Commit();
+                repoProduct.Add(product);
+                repoProduct.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
 
@@ -98,14 +96,13 @@ namespace MVC5Course.ActionFilter
         }
 
         // GET: Products/Edit/5
-        [紀錄Action執行時間]
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Product product = repo.Find(id.Value);
+            Product product = repoProduct.Find(id.Value);
             if (product == null)
             {
                 return HttpNotFound();
@@ -114,19 +111,20 @@ namespace MVC5Course.ActionFilter
         }
 
         // POST: Products/Edit/5
-        // 若要免於過量張貼攻擊，請啟用想要繫結的特定屬性，如需
-        // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id,FormCollection form)
+        [HandleError(View= "Error_DbEntityValidationException", ExceptionType =typeof(DbEntityValidationException))]
+        public ActionResult Edit(int id, FormCollection form)
         {
-            var product = repo.Find(id);
-            if (TryUpdateModel(product,includeProperties: new[] { "ProductName", "Price" }))
+            var product = repoProduct.Find(id);
+            if (TryUpdateModel(product, new string[] { "ProductName", "Stock" }))
             {
-                repo.UnitOfWork.Commit();
-                return RedirectToAction("Index");
             }
-            return View(product);
+            repoProduct.UnitOfWork.Commit();
+            return RedirectToAction("Index");
+            //return View(product);
         }
 
         // GET: Products/Delete/5
@@ -136,7 +134,7 @@ namespace MVC5Course.ActionFilter
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Product product = repo.Find(id.Value);
+            Product product = repoProduct.Find(id.Value);
             if (product == null)
             {
                 return HttpNotFound();
@@ -149,19 +147,34 @@ namespace MVC5Course.ActionFilter
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Product product = repo.Find(id);
-            repo.Delete(product);
-            repo.UnitOfWork.Commit();
+            Product product = repoProduct.Find(id);
+            repoProduct.Delete(product);
+            repoProduct.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }
 
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
+        private void DoSearchOnIndex(string sortBy, string keyword, int pageNo)
+        {
+            var all = repoProduct.All().AsQueryable();
+
+            if (!String.IsNullOrEmpty(keyword))
+            {
+                all = all.Where(p => p.ProductName.Contains(keyword));
+            }
+
+            if (sortBy == "+Price")
+            {
+                all = all.OrderBy(p => p.Price);
+            }
+            else
+            {
+                all = all.OrderByDescending(p => p.Price);
+            }
+
+            ViewBag.keyword = keyword;
+
+            ViewData.Model = all.ToPagedList(pageNo, 10);
+        }
+
     }
 }
